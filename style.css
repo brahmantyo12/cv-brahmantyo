@@ -1,0 +1,130 @@
+/* Reset dasar agar tampilan konsisten di semua browser */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); /* Warna biru profesional */
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Wadah utama (seperti kartu nama digital) */
+.container {
+    background: rgba(255, 255, 255, 0.1); /* Efek kaca transparan */
+    backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 480px; /* Lebar maksimal agar terlihat seperti tampilan HP di PC */
+    padding: 40px 20px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    text-align: center;
+}
+
+/* Styling Foto Profil */
+.avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.bio {
+    font-size: 0.9rem;
+    color: #e0e0e0;
+    margin-bottom: 20px;
+}
+
+/* Tombol Sosial Media (Email/WA) */
+.social-icons a {
+    text-decoration: none;
+    color: #fff;
+    margin: 0 10px;
+    font-size: 0.9rem;
+    padding: 8px 15px;
+    border: 1px solid #fff;
+    border-radius: 20px;
+    transition: 0.3s;
+}
+
+.social-icons a:hover {
+    background: #fff;
+    color: #1e3c72;
+}
+
+/* Styling Bagian Accordion (Tombol Utama) */
+.links {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.accordion {
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    border-radius: 12px;
+    outline: none;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: 0.4s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.accordion:hover, .accordion.active {
+    background-color: #f1f1f1;
+    transform: scale(1.02); /* Efek membesar sedikit saat disentuh */
+}
+
+/* Konten di dalam tombol (awalnya tersembunyi) */
+.panel {
+    padding: 0 18px;
+    background-color: rgba(0, 0, 0, 0.2);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+    border-radius: 0 0 12px 12px;
+    text-align: left;
+    margin-top: -10px; /* Agar menempel dengan tombol */
+    margin-bottom: 10px;
+}
+
+.panel p, .panel li {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 10px 0;
+    color: #ddd;
+}
+
+.job-item {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+footer {
+    margin-top: 30px;
+    font-size: 0.7rem;
+    color: #aaa;
+}
