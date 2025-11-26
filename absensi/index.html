@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Absensi - Brahmantyo Tedywisesa</title>
+    <link rel="icon" href="../favicon.png" type="image/x-icon">
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
     
@@ -26,6 +28,7 @@
         input, select, textarea {
             width: 100%; padding: 12px; border-radius: 10px; border: none;
             background: rgba(255,255,255,0.9); font-size: 0.9rem; margin-bottom: 5px;
+            color: #333; /* Warna teks agar kontras */
         }
         textarea { resize: vertical; height: 80px; }
         
@@ -37,7 +40,7 @@
         button:hover { background: #45a049; transform: scale(1.02); }
         button:disabled { background: #ccc; cursor: not-allowed; }
 
-        .loader { display: none; text-align: center; margin-top: 10px; font-size: 0.8rem; }
+        .loader { display: none; text-align: center; margin-top: 10px; font-size: 0.8rem; color: #ffeb3b; }
         
         /* Opsi User Lama */
         .user-select-container {
@@ -84,7 +87,7 @@
             <label>Domisili (Provinsi)</label>
             <select name="Domisili" id="provinsi" required>
                 <option value="">-- Pilih Provinsi --</option>
-                </select>
+            </select>
         </div>
 
         <div class="form-group">
@@ -93,7 +96,7 @@
         </div>
 
         <button type="submit" id="btnKirim">Kirim Absen</button>
-        <div class="loader" id="loader">Sedang mengirim data...</div>
+        <div class="loader" id="loader"><i class="fas fa-spinner fa-spin"></i> Sedang mengirim data...</div>
     </form>
     
     <div style="text-align: center; margin-top: 20px;">
@@ -102,7 +105,7 @@
 </div>
 
 <script>
-    // 1. CONFIG: MASUKKAN URL GOOGLE SCRIPT ANDA DI SINI
+    // 1. CONFIG: URL SUDAH BENAR
     const scriptURL = 'https://script.google.com/macros/s/AKfycbw6xMH_uyUxvXjSt0cLBIUlgmjNx8u-xf4QMDoB4PHxZALBgqxpy6xw_pozzDd7M7iXmQ/exec';
     
     const form = document.forms['submit-to-google-sheet'];
@@ -129,25 +132,32 @@
     });
 
     // 3. FITUR LOAD USER LAMA (AUTOCOMPLETE)
-    let userData = {}; // Menyimpan data user untuk autofill
+    let userData = {}; 
 
     fetch(scriptURL)
         .then(response => response.json())
         .then(users => {
-            // Hapus opsi loading
             existingUserSelect.innerHTML = '<option value="">-- Saya Pengguna Baru --</option>';
             
-            users.forEach(user => {
-                let option = document.createElement('option');
-                option.value = user.openid; // OpenID jadi kunci
-                option.text = user.nama + " (" + user.nickname + ")";
-                existingUserSelect.appendChild(option);
-                
-                // Simpan data lengkap ke variabel
-                userData[user.openid] = user;
-            });
+            if (users.length === 0) {
+                 let option = document.createElement('option');
+                 option.text = "(Belum ada data)";
+                 option.disabled = true;
+                 existingUserSelect.appendChild(option);
+            } else {
+                users.forEach(user => {
+                    let option = document.createElement('option');
+                    option.value = user.openid; 
+                    option.text = user.nama + " (" + user.nickname + ")";
+                    existingUserSelect.appendChild(option);
+                    userData[user.openid] = user;
+                });
+            }
         })
-        .catch(error => console.error('Error loading users:', error));
+        .catch(error => {
+            console.error('Error loading users:', error);
+            existingUserSelect.innerHTML = '<option disabled>Gagal memuat data user</option>';
+        });
 
     function fillData() {
         const selectedOpenID = existingUserSelect.value;
@@ -159,7 +169,6 @@
             document.getElementById('wa').value = data.wa;
             document.getElementById('provinsi').value = data.domisili;
         } else {
-            // Kosongkan form jika pilih "Pengguna Baru"
             form.reset();
         }
     }
@@ -173,14 +182,16 @@
 
         fetch(scriptURL, { method: 'POST', body: new FormData(form)})
             .then(response => {
-                alert("Absensi Berhasil Dikirim!");
+                alert("✅ Absensi Berhasil Dikirim!");
                 form.reset();
+                existingUserSelect.value = ""; 
                 btnKirim.disabled = false;
                 btnKirim.innerHTML = "Kirim Absen";
                 loader.style.display = "none";
+                // location.reload(); // Aktifkan jika ingin langsung refresh
             })
             .catch(error => {
-                alert("Gagal mengirim! Cek koneksi internet.");
+                alert("❌ Gagal mengirim! Cek koneksi internet.");
                 console.error('Error!', error.message);
                 btnKirim.disabled = false;
                 loader.style.display = "none";
