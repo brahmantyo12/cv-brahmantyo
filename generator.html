@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Generator Ultimate V3.1</title>
+    <title>CV Generator V4 (ATS Friendly)</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
@@ -17,33 +17,21 @@
         * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { margin: 0; padding: 0; display: flex; height: 100vh; overflow: hidden; background: #121212; color: #eee; }
         
-        /* Layout Panel Kiri: Menggunakan Flex Column agar footer tidak memotong konten */
         .editor {
             width: 40%; background: #1e1e1e; 
             border-right: 1px solid #333; box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; /* Layout vertikal */
+            display: flex; flex-direction: column;
             height: 100vh;
         }
 
-        /* Area Form yang Bisa di-Scroll */
-        .editor-content {
-            flex: 1; /* Mengisi sisa ruang */
-            overflow-y: auto; /* Scroll jika konten panjang */
-            padding: 20px;
-            padding-bottom: 40px; /* Jarak aman di bawah */
-        }
+        .editor-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 40px; }
         .editor-content::-webkit-scrollbar { width: 8px; }
         .editor-content::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
         
-        /* Area Tombol yang Selalu Muncul di Bawah */
         .action-bar {
-            flex-shrink: 0; /* Tidak boleh mengecil */
-            background: #181818; 
-            padding: 20px;
-            border-top: 1px solid #333; 
-            display: flex; flex-direction: column; gap: 10px;
-            z-index: 10;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+            flex-shrink: 0; background: #181818; padding: 20px;
+            border-top: 1px solid #333; display: flex; flex-direction: column; gap: 10px;
+            z-index: 10; box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
         }
 
         h2 { color: #FFD700; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 0; }
@@ -81,16 +69,15 @@
             flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #fff; text-align: center;
         }
         .btn-html { background: #2980b9; } 
-        .btn-pdf { background: #e74c3c; }  
-        .btn-img { background: #27ae60; } 
+        .btn-pdf { background: #fff; color: #333; border: 1px solid #ccc; } /* Putih untuk ATS PDF Style */ 
 
         /* --- PREVIEW AREA --- */
         .preview-area {
-            width: 60%; background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+            width: 60%; background: #555; /* Neutral background */
             display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto;
         }
         #render-target {
-            width: 100%; max-width: 480px; transform-origin: top center;
+            width: 100%; max-width: 500px; transform-origin: top center;
         }
     </style>
 </head>
@@ -98,19 +85,19 @@
 
     <div class="editor">
         <div class="editor-content">
-            <h2>🚀 CV Generator V3.1</h2>
+            <h2>📃 CV Generator V4 (ATS)</h2>
             
             <h3>1. Profile & Photo</h3>
             <div class="form-group">
-                <label>Upload Foto (Kosongkan jika ingin default)</label>
+                <label>Upload Foto (Opsional)</label>
                 <input type="file" id="pPhotoInput" accept="image/*">
             </div>
             <div class="form-group"><label>Nama Lengkap</label><input type="text" id="pName" placeholder="Contoh: John Doe" oninput="updateUI()"></div>
-            <div class="form-group"><label>Headline / Bio</label><input type="text" id="pBio" placeholder="Contoh: Network Engineer | IT Support" oninput="updateUI()"></div>
+            <div class="form-group"><label>Headline / Bio</label><input type="text" id="pBio" placeholder="Network Engineer | IT Support" oninput="updateUI()"></div>
 
             <h3>2. Contacts</h3>
             <div class="form-group"><label>Email</label><input type="text" id="cEmail" placeholder="email@contoh.com" oninput="updateUI()"></div>
-            <div class="form-group"><label>WhatsApp (Format: 628...)</label><input type="text" id="cWa" placeholder="62812345678" oninput="updateUI()"></div>
+            <div class="form-group"><label>WhatsApp</label><input type="text" id="cWa" placeholder="62812345678" oninput="updateUI()"></div>
             <div class="form-group"><label>LinkedIn URL</label><input type="text" id="cLinkedin" placeholder="https://linkedin.com/in/..." oninput="updateUI()"></div>
 
             <h3>3. Experiences</h3>
@@ -128,10 +115,9 @@
 
         <div class="action-bar">
             <label style="text-align:center; color:#FFD700; font-size:0.8rem;">Download Options</label>
-            <button class="btn-action btn-html" onclick="downloadWebHTML()"><i class="fas fa-code"></i> HTML (Web)</button>
+            <button class="btn-action btn-html" onclick="downloadWebHTML()"><i class="fas fa-globe"></i> HTML (Web Portfolio - Blue)</button>
             <div class="btn-group">
-                <button class="btn-action btn-pdf" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
-                <button class="btn-action btn-img" onclick="exportImage('png')"><i class="fas fa-image"></i> PNG</button>
+                <button class="btn-action btn-pdf" onclick="exportATSPDF()"><i class="fas fa-file-pdf"></i> PDF (ATS Clean Style)</button>
             </div>
         </div>
     </div>
@@ -142,183 +128,203 @@
     </div>
 
     <script>
-        // --- A. KONFIGURASI CSS UTAMA (Embedded) ---
-        const mainCSS = `
-            * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        // --- A. KONFIGURASI CSS ---
+        
+        // 1. CSS WEB (Glassmorphism - Biru)
+        const webCSS = `
+            * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
             body { 
                 background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
-                color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; 
+                color: #fff; min-height: 100vh; display: flex; justify-content: center; padding: 20px; 
             }
             .container {
-                background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-                width: 100%; max-width: 480px; padding: 30px 20px; border-radius: 20px;
-                border: 1px solid rgba(255, 255, 255, 0.18); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); text-align: center;
+                background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+                width: 100%; max-width: 500px; padding: 30px; border-radius: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.18); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             }
-            .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #fff; object-fit: cover; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); background: #ccc; }
-            h1 { font-size: 1.5rem; margin-bottom: 5px; line-height: 1.2; }
-            .bio { font-size: 0.9rem; color: #e0e0e0; margin-bottom: 20px; }
-            .social-icons { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-            .social-icons a { 
-                text-decoration: none; color: #fff; font-size: 0.85rem; padding: 8px 15px; 
-                border: 1px solid rgba(255,255,255,0.4); background: rgba(0,0,0,0.2); 
-                border-radius: 50px; display: inline-flex; align-items: center; gap: 5px; 
+            .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #fff; object-fit: cover; margin-bottom: 15px; margin: 0 auto; display:block;}
+            .header-text { text-align: center; margin-bottom: 20px; }
+            h1 { font-size: 1.6rem; margin-bottom: 5px; }
+            .bio { font-size: 0.9rem; color: #ddd; margin-bottom: 15px; }
+            .contacts { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
+            .contacts a { 
+                color: #fff; text-decoration: none; padding: 5px 12px; border: 1px solid rgba(255,255,255,0.5); 
+                border-radius: 20px; font-size: 0.8rem; background: rgba(0,0,0,0.2);
             }
-            .links { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
             
-            .accordion {
-                background-color: rgba(255, 255, 255, 0.95); color: #333; cursor: pointer; padding: 15px 20px;
-                width: 100%; text-align: left; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600;
-                display: flex; justify-content: space-between; align-items: center; transition: 0.3s;
+            /* Section Headers (Pengganti Accordion) */
+            .section-title {
+                border-bottom: 1px solid rgba(255,255,255,0.2); color: #FFD700;
+                font-size: 1.1rem; font-weight: 600; margin-top: 25px; margin-bottom: 15px; padding-bottom: 5px;
+                text-transform: uppercase; letter-spacing: 1px;
             }
-            .accordion::after { content: '\\f078'; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 0.8rem; transition: transform 0.3s; }
-            .accordion.active::after { transform: rotate(180deg); }
-            .accordion.active { border-radius: 12px 12px 0 0; }
             
-            .panel {
-                padding: 0 18px; background-color: rgba(0, 0, 0, 0.25); max-height: 0; overflow: hidden;
-                transition: max-height 0.3s ease-out; border-radius: 0 0 12px 12px; text-align: left;
-            }
-            .job-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 12px 0; }
-            .job-item:last-child { border-bottom: none; }
-            .job-item h3 { font-size: 1rem; color: #fff; margin-bottom: 2px; }
-            .panel p, .panel li { font-size: 0.85rem; line-height: 1.5; color: #ddd; }
-            footer { margin-top: 30px; font-size: 0.7rem; color: rgba(255,255,255,0.6); }
-
-            /* CSS UNTUK PRINT MODE */
-            .print-mode .accordion {
-                background: transparent; color: #FFD700; padding: 0; margin-bottom: 10px; margin-top: 20px;
-                cursor: default; pointer-events: none; border-radius: 0; border-bottom: 1px solid #FFD700; padding-bottom: 5px;
-            }
-            .print-mode .accordion::after { content: none; }
-            .print-mode .panel { background: transparent; max-height: none !important; padding: 0; border-radius: 0; overflow: visible; }
-            .print-mode .container { max-width: 100%; border: none; box-shadow: none; background: transparent; backdrop-filter: none; }
-            .print-mode body { background: #1e3c72; }
+            /* Content Layout */
+            .job-item { margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+            .job-item:last-child { border: none; }
+            .job-item h3 { font-size: 1rem; color: #fff; }
+            .job-item p { font-size: 0.85rem; color: #ddd; margin-top: 2px; }
+            .job-item ul { margin-top: 5px; padding-left: 15px; color: #ccc; font-size: 0.85rem; }
+            
+            .skill-list { list-style: none; padding: 0; }
+            .skill-list li { margin-bottom: 8px; display: flex; align-items: center; color: #eee; font-size: 0.9rem; }
+            
+            footer { text-align: center; margin-top: 30px; font-size: 0.7rem; color: rgba(255,255,255,0.5); }
         `;
 
-        const accordionScript = `
-            var acc = document.getElementsByClassName("accordion");
-            for (var i = 0; i < acc.length; i++) {
-                acc[i].addEventListener("click", function() {
-                    this.classList.toggle("active");
-                    var panel = this.nextElementSibling;
-                    if (panel.style.maxHeight) { panel.style.maxHeight = null; } 
-                    else { panel.style.maxHeight = panel.scrollHeight + "px"; } 
-                });
+        // 2. CSS ATS (Clean - Putih Hitam)
+        // Ini akan di-inject HANYA saat download PDF
+        const atsCSS = `
+            * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif !important; color: #000 !important; }
+            body { background: #fff !important; padding: 0 !important; }
+            .container {
+                background: #fff !important; width: 100% !important; max-width: 100% !important;
+                padding: 0 !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important;
             }
+            .avatar { width: 100px; height: 100px; border-radius: 0; border: none; margin-bottom: 10px; }
+            .header-text { text-align: left; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
+            h1 { font-size: 24px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+            .bio { color: #333 !important; font-style: italic; }
+            .contacts { justify-content: flex-start; gap: 15px; }
+            .contacts a { 
+                border: none; padding: 0; background: none; color: #000; text-decoration: underline; 
+            }
+            
+            .section-title {
+                border-bottom: 1px solid #000; color: #000 !important;
+                font-size: 14px; font-weight: bold; margin-top: 20px; margin-bottom: 10px;
+            }
+            
+            .job-item h3 { font-weight: bold; font-size: 14px; }
+            .job-item p { color: #333 !important; }
+            .job-item ul { color: #000 !important; }
+            footer { display: none; } /* Hide footer on PDF */
         `;
 
         // --- B. LOGIC ---
-        let profilePhotoBase64 = ""; // Kosongkan default
+        let profilePhotoBase64 = ""; 
 
         document.getElementById('pPhotoInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(evt) {
-                    profilePhotoBase64 = evt.target.result;
-                    updateUI();
-                };
+                reader.onload = function(evt) { profilePhotoBase64 = evt.target.result; updateUI(); };
                 reader.readAsDataURL(file);
             }
         });
 
         const skillIcons = [
             {val: "other", label: "Other (No Icon)"},
-            {val: "fas fa-network-wired", label: "Network / LAN"},
-            {val: "fas fa-server", label: "Server / SysAdmin"},
-            {val: "fas fa-tools", label: "Hardware / PC"},
-            {val: "fas fa-cloud", label: "Cloud"},
-            {val: "fas fa-code", label: "Code / Programming"},
+            {val: "fas fa-network-wired", label: "Network"},
+            {val: "fas fa-server", label: "Server"},
+            {val: "fas fa-code", label: "Code"},
             {val: "fab fa-python", label: "Python"},
-            {val: "fab fa-js", label: "JavaScript"},
             {val: "fas fa-users", label: "Community"},
-            {val: "fas fa-video", label: "Multimedia"},
             {val: "fas fa-language", label: "Language"}
         ];
 
-        function generateContent(mode) { 
-            // FALLBACK VALUES: Jika input kosong, pakai teks default "John Doe" dll
+        function generateContent() { 
             const name = document.getElementById('pName').value || "Nama Lengkap";
-            const bio = document.getElementById('pBio').value || "Deskripsi Singkat / Posisi Pekerjaan";
+            const bio = document.getElementById('pBio').value || "Posisi Pekerjaan";
             const email = document.getElementById('cEmail').value || "email@domain.com";
-            const wa = document.getElementById('cWa').value || "62...";
+            const wa = document.getElementById('cWa').value || "081...";
             const linkedin = document.getElementById('cLinkedin').value || "#";
-            
-            // Handle Photo Placeholder
-            const photoSrc = profilePhotoBase64 || "https://via.placeholder.com/150/CCCCCC/000000?text=FOTO";
+            const photoSrc = profilePhotoBase64 || "https://via.placeholder.com/150";
 
             let expHTML = '';
             document.querySelectorAll('.experience-item').forEach(item => {
-                const role = item.querySelector('.exp-role').value || "Posisi Pekerjaan";
-                const comp = item.querySelector('.exp-comp').value || "Nama Perusahaan & Tahun";
-                const descVal = item.querySelector('.exp-desc').value || "Deskripsi pekerjaan akan muncul di sini.";
-                const descList = descVal.split('\n').map(l => l ? `<li>${l}</li>` : '').join('');
-                expHTML += `<div class="job-item"><h3>${role}</h3><p><strong>${comp}</strong></p><ul style="padding-left: 20px; margin-top: 5px;">${descList}</ul></div>`;
+                const role = item.querySelector('.exp-role').value || "Posisi";
+                const comp = item.querySelector('.exp-comp').value || "Perusahaan";
+                const descList = (item.querySelector('.exp-desc').value || "").split('\n').map(l => l ? `<li>${l}</li>` : '').join('');
+                expHTML += `<div class="job-item"><h3>${role}</h3><p><strong>${comp}</strong></p><ul>${descList}</ul></div>`;
             });
 
             let projHTML = '';
             document.querySelectorAll('.project-item').forEach(item => {
-                const name = item.querySelector('.proj-name').value || "Nama Project";
-                const tech = item.querySelector('.proj-tech').value || "Teknologi";
-                const desc = item.querySelector('.proj-desc').value || "Deskripsi singkat project.";
-                const link = item.querySelector('.proj-link').value;
-                projHTML += `
-                    <div class="job-item">
-                        <h3>${name}</h3><p><strong>${tech}</strong></p>
-                        <p style="margin-top:5px; font-size:0.85rem;">${desc}</p>
-                        ${link ? `<div style="margin-top:8px;"><a href="${link}" target="_blank" style="color:#FFD700; border:1px solid #FFD700; padding:3px 10px; border-radius:4px; text-decoration:none; font-size:0.75rem;">Link Project</a></div>` : ''}
-                    </div>`;
+                const name = item.querySelector('.proj-name').value || "Project";
+                const tech = item.querySelector('.proj-tech').value || "Tech";
+                const desc = item.querySelector('.proj-desc').value || "";
+                projHTML += `<div class="job-item"><h3>${name}</h3><p><strong>${tech}</strong></p><p style="margin-top:5px;">${desc}</p></div>`;
             });
 
             let skillHTML = '';
             document.querySelectorAll('.skill-item').forEach(item => {
                 const iconClass = item.querySelector('.skill-select').value;
-                const name = item.querySelector('.skill-name').value || "Nama Skill";
-                let iconHTML = (iconClass === 'other') ? `<span style="width:25px; display:inline-block;">&bull;</span>` : `<i class="${iconClass}" style="width: 25px; color: #fff; margin-right: 10px;"></i>`;
-                skillHTML += `<li style="margin-bottom: 8px; display: flex; align-items: center; color: #eee;">${iconHTML} ${name}</li>`;
+                const name = item.querySelector('.skill-name').value || "Skill";
+                let iconHTML = (iconClass === 'other') ? `<span style="margin-right:10px;">•</span>` : `<i class="${iconClass}" style="width: 25px; margin-right: 5px;"></i>`;
+                skillHTML += `<li>${iconHTML} ${name}</li>`;
             });
 
-            const containerClass = (mode === 'print-export') ? 'container print-mode' : 'container';
-
             return `
-                <div class="${containerClass}">
-                    <div class="profile">
+                <div class="container">
+                    <div class="header-text">
                         <img src="${photoSrc}" class="avatar">
                         <h1>${name}</h1>
                         <p class="bio">${bio}</p>
-                        <div class="social-icons">
-                            <a href="mailto:${email}"><i class="fas fa-envelope"></i> Email</a>
-                            <a href="https://wa.me/${wa}"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-                            <a href="${linkedin}"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                        <div class="contacts">
+                            <a href="mailto:${email}">${email}</a>
+                            <a href="https://wa.me/${wa}">WhatsApp</a>
+                            <a href="${linkedin}">LinkedIn</a>
                         </div>
                     </div>
-                    <div class="links">
-                        <div class="section-group">
-                            <button class="accordion">Experiences</button>
-                            <div class="panel">${expHTML}</div>
-                        </div>
-                        ${projHTML ? `<div class="section-group"><button class="accordion">Key Projects</button><div class="panel">${projHTML}</div></div>` : ''}
-                        <div class="section-group">
-                            <button class="accordion">Skills</button>
-                            <div class="panel"><ul style="list-style: none; padding: 0; margin-top: 10px;">${skillHTML}</ul></div>
-                        </div>
-                    </div>
-                    <footer><p>&copy; 2025 ${name}</p></footer>
+                    
+                    <div class="section-title">Experiences</div>
+                    <div>${expHTML}</div>
+
+                    ${projHTML ? `<div class="section-title">Key Projects</div><div>${projHTML}</div>` : ''}
+
+                    <div class="section-title">Skills</div>
+                    <ul class="skill-list">${skillHTML}</ul>
+                    
+                    <footer>&copy; 2025 ${name}</footer>
                 </div>
             `;
         }
 
         function updateUI() {
-            const html = generateContent('preview');
+            // Default Preview pakai Web Style (Biru)
+            const html = generateContent();
             const target = document.getElementById('render-target');
-            target.innerHTML = html;
+            target.innerHTML = `<style>${webCSS}</style>` + html;
+        }
+
+        // --- EXPORT FUNCTIONS ---
+
+        // 1. Download HTML (Web Portfolio - Biru)
+        function downloadWebHTML() {
+            const content = generateContent();
+            const finalHTML = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Portofolio</title><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/><style>${webCSS}</style></head><body>${content}</body></html>`;
+            download(finalHTML, "index.html", "text/html");
+        }
+
+        // 2. Download PDF (ATS Style - Putih Bersih)
+        function exportATSPDF() {
+            const target = document.getElementById('render-target');
+            const originalHTML = target.innerHTML; // Simpan tampilan biru
+            
+            // 1. Ganti tampilan sementara jadi Putih (ATS Style)
+            const rawContent = generateContent(); // Ambil HTML mentah tanpa style
+            target.innerHTML = `<style>${atsCSS}</style>` + rawContent; // Inject ATS CSS
+            
+            // 2. Render PDF
+            const opt = { 
+                margin: 10, 
+                filename: 'CV_ATS_Friendly.pdf', 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2 }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            };
+            
+            html2pdf().set(opt).from(target).save().then(() => {
+                // 3. Kembalikan tampilan ke Biru setelah download selesai
+                target.innerHTML = originalHTML;
+            });
         }
 
         // --- HELPER FUNCTIONS ---
         function createInput(ph, cls, type="text") {
             const el = document.createElement(type==='textarea'?'textarea':'input');
-            el.placeholder = ph; el.className = cls; el.oninput = updateUI;
-            return el;
+            el.placeholder = ph; el.className = cls; el.oninput = updateUI; return el;
         }
         function createRemoveBtn(parent) {
             const btn = document.createElement('button'); btn.className='btn-remove'; btn.innerHTML='×';
@@ -328,9 +334,9 @@
             const c = document.getElementById('exp-container');
             const d = document.createElement('div'); d.className='dynamic-item experience-item';
             d.appendChild(createRemoveBtn(d));
-            d.appendChild(createInput('Posisi (Job Title)', 'exp-role'));
-            d.appendChild(createInput('Perusahaan & Tahun', 'exp-comp'));
-            d.appendChild(createInput('Deskripsi (Enter utk baris baru)', 'exp-desc', 'textarea'));
+            d.appendChild(createInput('Posisi', 'exp-role'));
+            d.appendChild(createInput('Perusahaan', 'exp-comp'));
+            d.appendChild(createInput('Deskripsi', 'exp-desc', 'textarea'));
             c.appendChild(d); updateUI();
         }
         function addProject() {
@@ -339,14 +345,12 @@
             d.appendChild(createRemoveBtn(d));
             d.appendChild(createInput('Nama Project', 'proj-name'));
             d.appendChild(createInput('Teknologi', 'proj-tech'));
-            d.appendChild(createInput('Deskripsi Singkat', 'proj-desc', 'textarea'));
-            d.appendChild(createInput('Link URL (Optional)', 'proj-link'));
+            d.appendChild(createInput('Deskripsi', 'proj-desc', 'textarea'));
             c.appendChild(d); updateUI();
         }
         function addSkill() {
             const c = document.getElementById('skill-container');
-            const d = document.createElement('div'); d.className='dynamic-item skill-item';
-            d.style.display="flex"; d.style.gap="10px"; d.style.alignItems="center";
+            const d = document.createElement('div'); d.className='dynamic-item skill-item'; d.style.display="flex"; d.style.gap="10px";
             d.appendChild(createRemoveBtn(d));
             const sel = document.createElement('select'); sel.className='skill-select';
             skillIcons.forEach(opt => { const o = document.createElement('option'); o.value=opt.val; o.innerText=opt.label; sel.appendChild(o); });
@@ -355,39 +359,7 @@
             c.appendChild(d); updateUI();
         }
 
-        // --- DOWNLOAD LOGIC ---
-        function downloadWebHTML() {
-            const content = generateContent('web-export');
-            const finalHTML = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Portofolio</title><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/><style>${mainCSS}</style></head><body>${content}<script>${accordionScript}<\/script></body></html>`;
-            download(finalHTML, "index.html", "text/html");
-        }
-
-        function exportPDF() {
-            const target = document.getElementById('render-target');
-            const originalHTML = target.innerHTML;
-            target.innerHTML = generateContent('print-export'); // Buka accordion
-            const styledElement = document.createElement('div');
-            styledElement.innerHTML = `<style>${mainCSS}</style>` + target.innerHTML;
-            
-            const opt = { margin: 0, filename: 'CV_Portofolio.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-            html2pdf().set(opt).from(styledElement).save().then(() => { target.innerHTML = originalHTML; });
-        }
-
-        function exportImage(format) {
-            const target = document.getElementById('render-target');
-            const originalHTML = target.innerHTML;
-            target.innerHTML = generateContent('print-export'); // Buka accordion
-            const styleTag = document.createElement('style'); styleTag.innerHTML = mainCSS; target.prepend(styleTag);
-            const options = { quality: 0.95, backgroundColor: '#1e3c72' };
-            const generator = (format === 'png') ? htmlToImage.toPng(target, options) : htmlToImage.toJpeg(target, options);
-            generator.then(function (dataUrl) { download(dataUrl, `cv-portfolio.${format}`); target.removeChild(styleTag); target.innerHTML = originalHTML; });
-        }
-
-        // Init
-        window.onload = function() {
-            const style = document.createElement('style'); style.innerHTML = mainCSS; document.head.appendChild(style);
-            addExperience(); addSkill(); updateUI();
-        }
+        window.onload = function() { addExperience(); addSkill(); updateUI(); }
     </script>
 </body>
 </html>
