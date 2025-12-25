@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Generator V4 (ATS Friendly)</title>
+    <title>CV Generator V5 (Auto-Sort & Certs)</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
@@ -35,7 +35,7 @@
         }
 
         h2 { color: #FFD700; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 0; }
-        h3 { color: #aaa; margin-top: 25px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        h3 { color: #aaa; margin-top: 30px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 5px;}
 
         .form-group { margin-bottom: 15px; }
         label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 5px; }
@@ -47,6 +47,7 @@
         input:focus, textarea:focus, select:focus { border-color: #FFD700; background: #333; }
         textarea { resize: vertical; min-height: 80px; }
 
+        /* Styling item dinamis */
         .dynamic-item {
             background: #252525; padding: 15px; border-radius: 8px; border: 1px solid #333;
             margin-bottom: 10px; position: relative; animation: fadeIn 0.3s ease;
@@ -69,11 +70,16 @@
             flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #fff; text-align: center;
         }
         .btn-html { background: #2980b9; } 
-        .btn-pdf { background: #fff; color: #333; border: 1px solid #ccc; } /* Putih untuk ATS PDF Style */ 
+        .btn-pdf { background: #fff; color: #333; border: 1px solid #ccc; }
+
+        /* Helper Grid untuk input tahun */
+        .row-inputs { display: flex; gap: 10px; }
+        .row-inputs input { flex: 1; }
+        .year-input { max-width: 80px; text-align: center; }
 
         /* --- PREVIEW AREA --- */
         .preview-area {
-            width: 60%; background: #555; /* Neutral background */
+            width: 60%; background: #555;
             display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto;
         }
         #render-target {
@@ -85,7 +91,7 @@
 
     <div class="editor">
         <div class="editor-content">
-            <h2>📃 CV Generator V4 (ATS)</h2>
+            <h2>📃 CV Generator V5</h2>
             
             <h3>1. Profile & Photo</h3>
             <div class="form-group">
@@ -100,7 +106,7 @@
             <div class="form-group"><label>WhatsApp</label><input type="text" id="cWa" placeholder="62812345678" oninput="updateUI()"></div>
             <div class="form-group"><label>LinkedIn URL</label><input type="text" id="cLinkedin" placeholder="https://linkedin.com/in/..." oninput="updateUI()"></div>
 
-            <h3>3. Experiences</h3>
+            <h3>3. Experiences (Auto Sort)</h3>
             <div id="exp-container"></div>
             <button class="btn-add" onclick="addExperience()">+ Tambah Pengalaman</button>
 
@@ -108,29 +114,32 @@
             <div id="proj-container"></div>
             <button class="btn-add" onclick="addProject()">+ Tambah Project</button>
             
-            <h3>5. Skills</h3>
+            <h3>5. Certifications (Auto Sort)</h3>
+            <div id="cert-container"></div>
+            <button class="btn-add" onclick="addCertification()">+ Tambah Sertifikat/Training</button>
+
+            <h3>6. Skills</h3>
             <div id="skill-container"></div>
             <button class="btn-add" onclick="addSkill()">+ Tambah Skill</button>
         </div>
 
         <div class="action-bar">
             <label style="text-align:center; color:#FFD700; font-size:0.8rem;">Download Options</label>
-            <button class="btn-action btn-html" onclick="downloadWebHTML()"><i class="fas fa-globe"></i> HTML (Web Portfolio - Blue)</button>
+            <button class="btn-action btn-html" onclick="downloadWebHTML()"><i class="fas fa-globe"></i> HTML (Web Portfolio)</button>
             <div class="btn-group">
-                <button class="btn-action btn-pdf" onclick="exportATSPDF()"><i class="fas fa-file-pdf"></i> PDF (ATS Clean Style)</button>
+                <button class="btn-action btn-pdf" onclick="exportATSPDF()"><i class="fas fa-file-pdf"></i> PDF (ATS Clean)</button>
             </div>
         </div>
     </div>
 
     <div class="preview-area">
-        <div id="render-target">
-            </div>
+        <div id="render-target"></div>
     </div>
 
     <script>
-        // --- A. KONFIGURASI CSS ---
+        // --- A. CSS CONFIGURATION ---
         
-        // 1. CSS WEB (Glassmorphism - Biru)
+        // 1. CSS WEB (Glassmorphism)
         const webCSS = `
             * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
             body { 
@@ -151,29 +160,22 @@
                 color: #fff; text-decoration: none; padding: 5px 12px; border: 1px solid rgba(255,255,255,0.5); 
                 border-radius: 20px; font-size: 0.8rem; background: rgba(0,0,0,0.2);
             }
-            
-            /* Section Headers (Pengganti Accordion) */
             .section-title {
                 border-bottom: 1px solid rgba(255,255,255,0.2); color: #FFD700;
                 font-size: 1.1rem; font-weight: 600; margin-top: 25px; margin-bottom: 15px; padding-bottom: 5px;
                 text-transform: uppercase; letter-spacing: 1px;
             }
-            
-            /* Content Layout */
             .job-item { margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
             .job-item:last-child { border: none; }
             .job-item h3 { font-size: 1rem; color: #fff; }
             .job-item p { font-size: 0.85rem; color: #ddd; margin-top: 2px; }
             .job-item ul { margin-top: 5px; padding-left: 15px; color: #ccc; font-size: 0.85rem; }
-            
             .skill-list { list-style: none; padding: 0; }
             .skill-list li { margin-bottom: 8px; display: flex; align-items: center; color: #eee; font-size: 0.9rem; }
-            
             footer { text-align: center; margin-top: 30px; font-size: 0.7rem; color: rgba(255,255,255,0.5); }
         `;
 
-        // 2. CSS ATS (Clean - Putih Hitam)
-        // Ini akan di-inject HANYA saat download PDF
+        // 2. CSS ATS (PDF - Putih)
         const atsCSS = `
             * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif !important; color: #000 !important; }
             body { background: #fff !important; padding: 0 !important; }
@@ -186,22 +188,18 @@
             h1 { font-size: 24px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
             .bio { color: #333 !important; font-style: italic; }
             .contacts { justify-content: flex-start; gap: 15px; }
-            .contacts a { 
-                border: none; padding: 0; background: none; color: #000; text-decoration: underline; 
-            }
-            
+            .contacts a { border: none; padding: 0; background: none; color: #000; text-decoration: none; }
             .section-title {
                 border-bottom: 1px solid #000; color: #000 !important;
                 font-size: 14px; font-weight: bold; margin-top: 20px; margin-bottom: 10px;
             }
-            
             .job-item h3 { font-weight: bold; font-size: 14px; }
             .job-item p { color: #333 !important; }
             .job-item ul { color: #000 !important; }
-            footer { display: none; } /* Hide footer on PDF */
+            footer { display: none; }
         `;
 
-        // --- B. LOGIC ---
+        // --- B. LOGIC & DATA ---
         let profilePhotoBase64 = ""; 
 
         document.getElementById('pPhotoInput').addEventListener('change', function(e) {
@@ -215,6 +213,7 @@
 
         const skillIcons = [
             {val: "other", label: "Other (No Icon)"},
+            {val: "fas fa-certificate", label: "Certificate"},
             {val: "fas fa-network-wired", label: "Network"},
             {val: "fas fa-server", label: "Server"},
             {val: "fas fa-code", label: "Code"},
@@ -223,6 +222,7 @@
             {val: "fas fa-language", label: "Language"}
         ];
 
+        // FUNGSI UTAMA: MENGAMBIL DATA, SORTING, DAN RENDER
         function generateContent() { 
             const name = document.getElementById('pName').value || "Nama Lengkap";
             const bio = document.getElementById('pBio').value || "Posisi Pekerjaan";
@@ -231,30 +231,69 @@
             const linkedin = document.getElementById('cLinkedin').value || "#";
             const photoSrc = profilePhotoBase64 || "https://via.placeholder.com/150";
 
-            let expHTML = '';
-            document.querySelectorAll('.experience-item').forEach(item => {
-                const role = item.querySelector('.exp-role').value || "Posisi";
-                const comp = item.querySelector('.exp-comp').value || "Perusahaan";
-                const descList = (item.querySelector('.exp-desc').value || "").split('\n').map(l => l ? `<li>${l}</li>` : '').join('');
-                expHTML += `<div class="job-item"><h3>${role}</h3><p><strong>${comp}</strong></p><ul>${descList}</ul></div>`;
-            });
+            // 1. PROCESS EXPERIENCES (WITH SORTING)
+            const expElements = Array.from(document.querySelectorAll('.experience-item'));
+            const expData = expElements.map(item => ({
+                role: item.querySelector('.exp-role').value,
+                comp: item.querySelector('.exp-comp').value,
+                year: parseInt(item.querySelector('.exp-year').value) || 0, // Ambil tahun untuk sorting
+                desc: item.querySelector('.exp-desc').value
+            }));
 
+            // Sort Descending (Terbaru di atas)
+            expData.sort((a, b) => b.year - a.year);
+
+            const expHTML = expData.map(d => {
+                if(!d.role) return '';
+                const descList = d.desc.split('\n').map(l => l ? `<li>${l}</li>` : '').join('');
+                return `<div class="job-item"><h3>${d.role}</h3><p><strong>${d.comp}</strong></p><ul>${descList}</ul></div>`;
+            }).join('');
+
+
+            // 2. PROCESS PROJECTS (NO SORTING / MANUAL)
             let projHTML = '';
             document.querySelectorAll('.project-item').forEach(item => {
-                const name = item.querySelector('.proj-name').value || "Project";
-                const tech = item.querySelector('.proj-tech').value || "Tech";
-                const desc = item.querySelector('.proj-desc').value || "";
-                projHTML += `<div class="job-item"><h3>${name}</h3><p><strong>${tech}</strong></p><p style="margin-top:5px;">${desc}</p></div>`;
+                const name = item.querySelector('.proj-name').value;
+                const tech = item.querySelector('.proj-tech').value;
+                const desc = item.querySelector('.proj-desc').value;
+                if(name) projHTML += `<div class="job-item"><h3>${name}</h3><p><strong>${tech}</strong></p><p style="margin-top:5px;">${desc}</p></div>`;
             });
 
+
+            // 3. PROCESS CERTIFICATIONS (WITH SORTING)
+            const certElements = Array.from(document.querySelectorAll('.cert-item'));
+            const certData = certElements.map(item => ({
+                name: item.querySelector('.cert-name').value,
+                issuer: item.querySelector('.cert-issuer').value,
+                year: parseInt(item.querySelector('.cert-year').value) || 0
+            }));
+
+            // Sort Descending
+            certData.sort((a, b) => b.year - a.year);
+
+            const certHTML = certData.map(d => {
+                if(!d.name) return '';
+                return `
+                <div class="job-item" style="border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <h3 style="font-size:0.95rem;">${d.name}</h3>
+                        <span style="font-size:0.8rem; color:#aaa;">${d.year || ''}</span>
+                    </div>
+                    <p style="font-size:0.85rem; color:#ccc;">${d.issuer}</p>
+                </div>`;
+            }).join('');
+
+
+            // 4. PROCESS SKILLS
             let skillHTML = '';
             document.querySelectorAll('.skill-item').forEach(item => {
                 const iconClass = item.querySelector('.skill-select').value;
-                const name = item.querySelector('.skill-name').value || "Skill";
+                const name = item.querySelector('.skill-name').value;
                 let iconHTML = (iconClass === 'other') ? `<span style="margin-right:10px;">•</span>` : `<i class="${iconClass}" style="width: 25px; margin-right: 5px;"></i>`;
-                skillHTML += `<li>${iconHTML} ${name}</li>`;
+                if(name) skillHTML += `<li>${iconHTML} ${name}</li>`;
             });
 
+            // RETURN HTML STRUCTURE
             return `
                 <div class="container">
                     <div class="header-text">
@@ -273,6 +312,8 @@
 
                     ${projHTML ? `<div class="section-title">Key Projects</div><div>${projHTML}</div>` : ''}
 
+                    ${certHTML ? `<div class="section-title">Certifications & Training</div><div>${certHTML}</div>` : ''}
+
                     <div class="section-title">Skills</div>
                     <ul class="skill-list">${skillHTML}</ul>
                     
@@ -282,43 +323,31 @@
         }
 
         function updateUI() {
-            // Default Preview pakai Web Style (Biru)
             const html = generateContent();
             const target = document.getElementById('render-target');
             target.innerHTML = `<style>${webCSS}</style>` + html;
         }
 
         // --- EXPORT FUNCTIONS ---
-
-        // 1. Download HTML (Web Portfolio - Biru)
         function downloadWebHTML() {
             const content = generateContent();
             const finalHTML = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Portofolio</title><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/><style>${webCSS}</style></head><body>${content}</body></html>`;
             download(finalHTML, "index.html", "text/html");
         }
 
-        // 2. Download PDF (ATS Style - Putih Bersih)
         function exportATSPDF() {
             const target = document.getElementById('render-target');
-            const originalHTML = target.innerHTML; // Simpan tampilan biru
+            const originalHTML = target.innerHTML; 
+            const rawContent = generateContent(); 
+            target.innerHTML = `<style>${atsCSS}</style>` + rawContent; 
             
-            // 1. Ganti tampilan sementara jadi Putih (ATS Style)
-            const rawContent = generateContent(); // Ambil HTML mentah tanpa style
-            target.innerHTML = `<style>${atsCSS}</style>` + rawContent; // Inject ATS CSS
-            
-            // 2. Render PDF
             const opt = { 
-                margin: 10, 
-                filename: 'CV_ATS_Friendly.pdf', 
+                margin: 10, filename: 'CV_ATS_Friendly.pdf', 
                 image: { type: 'jpeg', quality: 0.98 }, 
                 html2canvas: { scale: 2 }, 
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
             };
-            
-            html2pdf().set(opt).from(target).save().then(() => {
-                // 3. Kembalikan tampilan ke Biru setelah download selesai
-                target.innerHTML = originalHTML;
-            });
+            html2pdf().set(opt).from(target).save().then(() => { target.innerHTML = originalHTML; });
         }
 
         // --- HELPER FUNCTIONS ---
@@ -330,15 +359,38 @@
             const btn = document.createElement('button'); btn.className='btn-remove'; btn.innerHTML='×';
             btn.onclick = ()=>{ parent.remove(); updateUI(); }; return btn;
         }
+
+        // Add Experience with Year Sorting
         function addExperience() {
             const c = document.getElementById('exp-container');
             const d = document.createElement('div'); d.className='dynamic-item experience-item';
             d.appendChild(createRemoveBtn(d));
-            d.appendChild(createInput('Posisi', 'exp-role'));
-            d.appendChild(createInput('Perusahaan', 'exp-comp'));
-            d.appendChild(createInput('Deskripsi', 'exp-desc', 'textarea'));
+            d.appendChild(createInput('Posisi (Job Title)', 'exp-role'));
+            
+            const row = document.createElement('div'); row.className = 'row-inputs';
+            row.appendChild(createInput('Perusahaan & Durasi (Teks Tampil)', 'exp-comp'));
+            row.appendChild(createInput('Tahun (Angka Sort)', 'exp-year year-input', 'number')); // Hidden logic for sort
+            d.appendChild(row);
+
+            d.appendChild(createInput('Deskripsi (Enter utk baris baru)', 'exp-desc', 'textarea'));
             c.appendChild(d); updateUI();
         }
+
+        // Add Certifications
+        function addCertification() {
+            const c = document.getElementById('cert-container');
+            const d = document.createElement('div'); d.className='dynamic-item cert-item';
+            d.appendChild(createRemoveBtn(d));
+            
+            const row = document.createElement('div'); row.className = 'row-inputs';
+            row.appendChild(createInput('Nama Sertifikat / Event', 'cert-name'));
+            row.appendChild(createInput('Tahun', 'cert-year year-input', 'number'));
+            d.appendChild(row);
+            
+            d.appendChild(createInput('Penerbit / Organisasi', 'cert-issuer'));
+            c.appendChild(d); updateUI();
+        }
+
         function addProject() {
             const c = document.getElementById('proj-container');
             const d = document.createElement('div'); d.className='dynamic-item project-item';
@@ -348,6 +400,7 @@
             d.appendChild(createInput('Deskripsi', 'proj-desc', 'textarea'));
             c.appendChild(d); updateUI();
         }
+
         function addSkill() {
             const c = document.getElementById('skill-container');
             const d = document.createElement('div'); d.className='dynamic-item skill-item'; d.style.display="flex"; d.style.gap="10px";
@@ -359,7 +412,9 @@
             c.appendChild(d); updateUI();
         }
 
-        window.onload = function() { addExperience(); addSkill(); updateUI(); }
+        window.onload = function() { 
+            addExperience(); addCertification(); addSkill(); updateUI(); 
+        }
     </script>
 </body>
 </html>
