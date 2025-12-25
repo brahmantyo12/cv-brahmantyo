@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Generator Ultimate V3</title>
+    <title>CV Generator Ultimate V3.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
@@ -13,17 +13,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
 
     <style>
-        /* CSS Editor UI (Dark Mode) */
+        /* --- CSS EDITOR UI (Dark Mode) --- */
         * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { margin: 0; padding: 0; display: flex; height: 100vh; overflow: hidden; background: #121212; color: #eee; }
         
+        /* Layout Panel Kiri: Menggunakan Flex Column agar footer tidak memotong konten */
         .editor {
-            width: 40%; background: #1e1e1e; padding: 20px; overflow-y: auto;
+            width: 40%; background: #1e1e1e; 
             border-right: 1px solid #333; box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; /* Layout vertikal */
+            height: 100vh;
         }
-        .editor::-webkit-scrollbar { width: 8px; }
-        .editor::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+
+        /* Area Form yang Bisa di-Scroll */
+        .editor-content {
+            flex: 1; /* Mengisi sisa ruang */
+            overflow-y: auto; /* Scroll jika konten panjang */
+            padding: 20px;
+            padding-bottom: 40px; /* Jarak aman di bawah */
+        }
+        .editor-content::-webkit-scrollbar { width: 8px; }
+        .editor-content::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
         
+        /* Area Tombol yang Selalu Muncul di Bawah */
+        .action-bar {
+            flex-shrink: 0; /* Tidak boleh mengecil */
+            background: #181818; 
+            padding: 20px;
+            border-top: 1px solid #333; 
+            display: flex; flex-direction: column; gap: 10px;
+            z-index: 10;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+        }
+
         h2 { color: #FFD700; border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 0; }
         h3 { color: #aaa; margin-top: 25px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
 
@@ -54,25 +76,19 @@
         }
         .btn-add:hover { background: #FFD700; color: #000; }
 
-        /* Action Buttons Area */
-        .action-bar {
-            position: sticky; bottom: 0; background: #1e1e1e; padding: 20px 0;
-            border-top: 1px solid #333; display: flex; flex-direction: column; gap: 10px;
-        }
         .btn-group { display: flex; gap: 10px; }
         .btn-action {
             flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #fff; text-align: center;
         }
-        .btn-html { background: #2980b9; } /* Web */
-        .btn-pdf { background: #e74c3c; }  /* PDF */
-        .btn-img { background: #27ae60; }  /* IMG */
+        .btn-html { background: #2980b9; } 
+        .btn-pdf { background: #e74c3c; }  
+        .btn-img { background: #27ae60; } 
 
-        /* Preview Area */
+        /* --- PREVIEW AREA --- */
         .preview-area {
             width: 60%; background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
             display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto;
         }
-        /* Container Preview yang akan di-render */
         #render-target {
             width: 100%; max-width: 480px; transform-origin: top center;
         }
@@ -81,39 +97,41 @@
 <body>
 
     <div class="editor">
-        <h2>🚀 CV Generator V3</h2>
-        
-        <h3>1. Profile & Photo</h3>
-        <div class="form-group">
-            <label>Upload Foto (Otomatis jadi Base64)</label>
-            <input type="file" id="pPhotoInput" accept="image/*">
+        <div class="editor-content">
+            <h2>🚀 CV Generator V3.1</h2>
+            
+            <h3>1. Profile & Photo</h3>
+            <div class="form-group">
+                <label>Upload Foto (Kosongkan jika ingin default)</label>
+                <input type="file" id="pPhotoInput" accept="image/*">
+            </div>
+            <div class="form-group"><label>Nama Lengkap</label><input type="text" id="pName" placeholder="Contoh: John Doe" oninput="updateUI()"></div>
+            <div class="form-group"><label>Headline / Bio</label><input type="text" id="pBio" placeholder="Contoh: Network Engineer | IT Support" oninput="updateUI()"></div>
+
+            <h3>2. Contacts</h3>
+            <div class="form-group"><label>Email</label><input type="text" id="cEmail" placeholder="email@contoh.com" oninput="updateUI()"></div>
+            <div class="form-group"><label>WhatsApp (Format: 628...)</label><input type="text" id="cWa" placeholder="62812345678" oninput="updateUI()"></div>
+            <div class="form-group"><label>LinkedIn URL</label><input type="text" id="cLinkedin" placeholder="https://linkedin.com/in/..." oninput="updateUI()"></div>
+
+            <h3>3. Experiences</h3>
+            <div id="exp-container"></div>
+            <button class="btn-add" onclick="addExperience()">+ Tambah Pengalaman</button>
+
+            <h3>4. Projects</h3>
+            <div id="proj-container"></div>
+            <button class="btn-add" onclick="addProject()">+ Tambah Project</button>
+            
+            <h3>5. Skills</h3>
+            <div id="skill-container"></div>
+            <button class="btn-add" onclick="addSkill()">+ Tambah Skill</button>
         </div>
-        <div class="form-group"><label>Nama Lengkap</label><input type="text" id="pName" value="Brahmantyo Tedywisesa" oninput="updateUI()"></div>
-        <div class="form-group"><label>Headline / Bio</label><input type="text" id="pBio" value="IT Professional | Network Specialist" oninput="updateUI()"></div>
-
-        <h3>2. Contacts</h3>
-        <div class="form-group"><label>Email</label><input type="text" id="cEmail" value="brahmantyo12@gmail.com" oninput="updateUI()"></div>
-        <div class="form-group"><label>WhatsApp</label><input type="text" id="cWa" value="6281703792075" oninput="updateUI()"></div>
-        <div class="form-group"><label>LinkedIn URL</label><input type="text" id="cLinkedin" value="#" oninput="updateUI()"></div>
-
-        <h3>3. Experiences</h3>
-        <div id="exp-container"></div>
-        <button class="btn-add" onclick="addExperience()">+ Tambah Pengalaman</button>
-
-        <h3>4. Projects</h3>
-        <div id="proj-container"></div>
-        <button class="btn-add" onclick="addProject()">+ Tambah Project</button>
-        
-        <h3>5. Skills</h3>
-        <div id="skill-container"></div>
-        <button class="btn-add" onclick="addSkill()">+ Tambah Skill</button>
 
         <div class="action-bar">
-            <label style="text-align:center; color:#FFD700;">Download Options</label>
-            <button class="btn-action btn-html" onclick="downloadWebHTML()"><i class="fas fa-code"></i> HTML (Web Interactive)</button>
+            <label style="text-align:center; color:#FFD700; font-size:0.8rem;">Download Options</label>
+            <button class="btn-action btn-html" onclick="downloadWebHTML()"><i class="fas fa-code"></i> HTML (Web)</button>
             <div class="btn-group">
-                <button class="btn-action btn-pdf" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF (Full Open)</button>
-                <button class="btn-action btn-img" onclick="exportImage('png')"><i class="fas fa-image"></i> PNG (Full Open)</button>
+                <button class="btn-action btn-pdf" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                <button class="btn-action btn-img" onclick="exportImage('png')"><i class="fas fa-image"></i> PNG</button>
             </div>
         </div>
     </div>
@@ -124,8 +142,7 @@
     </div>
 
     <script>
-        // --- A. KONFIGURASI CSS (INLINE) ---
-        // Kita simpan CSS utama dalam string javascript agar bisa ditanam ke output
+        // --- A. KONFIGURASI CSS UTAMA (Embedded) ---
         const mainCSS = `
             * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
             body { 
@@ -137,7 +154,7 @@
                 width: 100%; max-width: 480px; padding: 30px 20px; border-radius: 20px;
                 border: 1px solid rgba(255, 255, 255, 0.18); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); text-align: center;
             }
-            .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #fff; object-fit: cover; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+            .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #fff; object-fit: cover; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); background: #ccc; }
             h1 { font-size: 1.5rem; margin-bottom: 5px; line-height: 1.2; }
             .bio { font-size: 0.9rem; color: #e0e0e0; margin-bottom: 20px; }
             .social-icons { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
@@ -148,7 +165,6 @@
             }
             .links { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
             
-            /* Accordion Styling */
             .accordion {
                 background-color: rgba(255, 255, 255, 0.95); color: #333; cursor: pointer; padding: 15px 20px;
                 width: 100%; text-align: left; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600;
@@ -162,28 +178,23 @@
                 padding: 0 18px; background-color: rgba(0, 0, 0, 0.25); max-height: 0; overflow: hidden;
                 transition: max-height 0.3s ease-out; border-radius: 0 0 12px 12px; text-align: left;
             }
-            .panel.open-force { max-height: none !important; padding-top: 15px; padding-bottom: 15px; } /* Untuk PDF/IMG */
-
             .job-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 12px 0; }
             .job-item:last-child { border-bottom: none; }
             .job-item h3 { font-size: 1rem; color: #fff; margin-bottom: 2px; }
             .panel p, .panel li { font-size: 0.85rem; line-height: 1.5; color: #ddd; }
             footer { margin-top: 30px; font-size: 0.7rem; color: rgba(255,255,255,0.6); }
 
-            /* CSS KHUSUS PRINT/EXPORT (Agar accordion hilang dan jadi header biasa) */
+            /* CSS UNTUK PRINT MODE */
             .print-mode .accordion {
                 background: transparent; color: #FFD700; padding: 0; margin-bottom: 10px; margin-top: 20px;
                 cursor: default; pointer-events: none; border-radius: 0; border-bottom: 1px solid #FFD700; padding-bottom: 5px;
             }
             .print-mode .accordion::after { content: none; }
-            .print-mode .panel {
-                background: transparent; max-height: none !important; padding: 0; border-radius: 0; overflow: visible;
-            }
+            .print-mode .panel { background: transparent; max-height: none !important; padding: 0; border-radius: 0; overflow: visible; }
             .print-mode .container { max-width: 100%; border: none; box-shadow: none; background: transparent; backdrop-filter: none; }
-            .print-mode body { background: #1e3c72; } /* Flat background for cleaner print */
+            .print-mode body { background: #1e3c72; }
         `;
 
-        // Script JS untuk Accordion (Hanya dipakai saat mode Web)
         const accordionScript = `
             var acc = document.getElementsByClassName("accordion");
             for (var i = 0; i < acc.length; i++) {
@@ -196,72 +207,62 @@
             }
         `;
 
-        // --- B. DATA & LOGIC ---
-        
-        let profilePhotoBase64 = "https://via.placeholder.com/150"; // Default placeholder
+        // --- B. LOGIC ---
+        let profilePhotoBase64 = ""; // Kosongkan default
 
-        // 1. Handle Image Upload
         document.getElementById('pPhotoInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(evt) {
-                    profilePhotoBase64 = evt.target.result; // Simpan string base64
+                    profilePhotoBase64 = evt.target.result;
                     updateUI();
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // 2. Skill Icons List (Diperbanyak)
         const skillIcons = [
             {val: "other", label: "Other (No Icon)"},
             {val: "fas fa-network-wired", label: "Network / LAN"},
             {val: "fas fa-server", label: "Server / SysAdmin"},
             {val: "fas fa-tools", label: "Hardware / PC"},
-            {val: "fas fa-cloud", label: "Cloud / Alibaba"},
+            {val: "fas fa-cloud", label: "Cloud"},
             {val: "fas fa-code", label: "Code / Programming"},
             {val: "fab fa-python", label: "Python"},
             {val: "fab fa-js", label: "JavaScript"},
-            {val: "fab fa-html5", label: "HTML5 / CSS3"},
-            {val: "fas fa-database", label: "Database / SQL"},
-            {val: "fas fa-video", label: "Video Editing"},
-            {val: "fas fa-camera", label: "Photography"},
-            {val: "fas fa-users", label: "Community / Event"},
-            {val: "fas fa-shopping-cart", label: "E-Commerce"},
-            {val: "fas fa-chart-line", label: "SEO / Marketing"},
-            {val: "fas fa-hard-hat", label: "Safety / K3"},
-            {val: "fas fa-language", label: "Language / English"}
+            {val: "fas fa-users", label: "Community"},
+            {val: "fas fa-video", label: "Multimedia"},
+            {val: "fas fa-language", label: "Language"}
         ];
 
-        // --- C. RENDER FUNCTION ---
-        
         function generateContent(mode) { 
-            // mode: 'preview', 'web-export', 'print-export'
+            // FALLBACK VALUES: Jika input kosong, pakai teks default "John Doe" dll
+            const name = document.getElementById('pName').value || "Nama Lengkap";
+            const bio = document.getElementById('pBio').value || "Deskripsi Singkat / Posisi Pekerjaan";
+            const email = document.getElementById('cEmail').value || "email@domain.com";
+            const wa = document.getElementById('cWa').value || "62...";
+            const linkedin = document.getElementById('cLinkedin').value || "#";
             
-            const name = document.getElementById('pName').value;
-            const bio = document.getElementById('pBio').value;
-            const email = document.getElementById('cEmail').value;
-            const wa = document.getElementById('cWa').value;
-            const linkedin = document.getElementById('cLinkedin').value;
+            // Handle Photo Placeholder
+            const photoSrc = profilePhotoBase64 || "https://via.placeholder.com/150/CCCCCC/000000?text=FOTO";
 
-            // Generate Experiences
             let expHTML = '';
             document.querySelectorAll('.experience-item').forEach(item => {
-                const role = item.querySelector('.exp-role').value;
-                const comp = item.querySelector('.exp-comp').value;
-                const descList = item.querySelector('.exp-desc').value.split('\n').map(l => l ? `<li>${l}</li>` : '').join('');
-                if(role) expHTML += `<div class="job-item"><h3>${role}</h3><p><strong>${comp}</strong></p><ul style="padding-left: 20px; margin-top: 5px;">${descList}</ul></div>`;
+                const role = item.querySelector('.exp-role').value || "Posisi Pekerjaan";
+                const comp = item.querySelector('.exp-comp').value || "Nama Perusahaan & Tahun";
+                const descVal = item.querySelector('.exp-desc').value || "Deskripsi pekerjaan akan muncul di sini.";
+                const descList = descVal.split('\n').map(l => l ? `<li>${l}</li>` : '').join('');
+                expHTML += `<div class="job-item"><h3>${role}</h3><p><strong>${comp}</strong></p><ul style="padding-left: 20px; margin-top: 5px;">${descList}</ul></div>`;
             });
 
-            // Generate Projects
             let projHTML = '';
             document.querySelectorAll('.project-item').forEach(item => {
-                const name = item.querySelector('.proj-name').value;
-                const tech = item.querySelector('.proj-tech').value;
-                const desc = item.querySelector('.proj-desc').value;
+                const name = item.querySelector('.proj-name').value || "Nama Project";
+                const tech = item.querySelector('.proj-tech').value || "Teknologi";
+                const desc = item.querySelector('.proj-desc').value || "Deskripsi singkat project.";
                 const link = item.querySelector('.proj-link').value;
-                if(name) projHTML += `
+                projHTML += `
                     <div class="job-item">
                         <h3>${name}</h3><p><strong>${tech}</strong></p>
                         <p style="margin-top:5px; font-size:0.85rem;">${desc}</p>
@@ -269,31 +270,20 @@
                     </div>`;
             });
 
-            // Generate Skills
             let skillHTML = '';
             document.querySelectorAll('.skill-item').forEach(item => {
                 const iconClass = item.querySelector('.skill-select').value;
-                const name = item.querySelector('.skill-name').value;
-                
-                // Cek jika user pilih 'other' atau icon biasa
-                let iconHTML = '';
-                if (iconClass === 'other') {
-                    iconHTML = `<span style="width:25px; display:inline-block;">&bull;</span>`; // Bullet point
-                } else {
-                    iconHTML = `<i class="${iconClass}" style="width: 25px; color: #fff; margin-right: 10px;"></i>`;
-                }
-
-                if(name) skillHTML += `<li style="margin-bottom: 8px; display: flex; align-items: center; color: #eee;">${iconHTML} ${name}</li>`;
+                const name = item.querySelector('.skill-name').value || "Nama Skill";
+                let iconHTML = (iconClass === 'other') ? `<span style="width:25px; display:inline-block;">&bull;</span>` : `<i class="${iconClass}" style="width: 25px; color: #fff; margin-right: 10px;"></i>`;
+                skillHTML += `<li style="margin-bottom: 8px; display: flex; align-items: center; color: #eee;">${iconHTML} ${name}</li>`;
             });
 
-            // Tentukan Class untuk Body Container
-            // Jika mode print/pdf/img, kita pakai class 'print-mode' biar accordion kebuka semua
             const containerClass = (mode === 'print-export') ? 'container print-mode' : 'container';
 
             return `
                 <div class="${containerClass}">
                     <div class="profile">
-                        <img src="${profilePhotoBase64}" class="avatar">
+                        <img src="${photoSrc}" class="avatar">
                         <h1>${name}</h1>
                         <p class="bio">${bio}</p>
                         <div class="social-icons">
@@ -305,7 +295,7 @@
                     <div class="links">
                         <div class="section-group">
                             <button class="accordion">Experiences</button>
-                            <div class="panel">${expHTML || '<p style="padding:10px;">Belum ada data</p>'}</div>
+                            <div class="panel">${expHTML}</div>
                         </div>
                         ${projHTML ? `<div class="section-group"><button class="accordion">Key Projects</button><div class="panel">${projHTML}</div></div>` : ''}
                         <div class="section-group">
@@ -318,115 +308,22 @@
             `;
         }
 
-        // Fungsi Render ke Layar Preview
         function updateUI() {
             const html = generateContent('preview');
             const target = document.getElementById('render-target');
             target.innerHTML = html;
-            
-            // Inject Stylesheet ke dalam Preview Div (Shadow DOM style)
-            // Tapi karena ini div biasa, kita inject style tag global saja tapi scoped atau pakai iframe method
-            // Biar simple, kita pasang style tag di head document ini khusus untuk #render-target
-            // (Sudah diatur di CSS utama admin page ini, tapi perlu fontawesome)
-            
-            // Re-apply style for CSS variables inside render target if needed. 
-            // Disini kita mengandalkan CSS Main page. 
         }
 
-        // --- D. EXPORT FUNCTIONS ---
-
-        // 1. Download HTML (Versi Web Interaktif)
-        function downloadWebHTML() {
-            const content = generateContent('web-export');
-            const finalHTML = `
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portofolio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
-    <style>${mainCSS}</style>
-</head>
-<body>
-    ${content}
-    <script>${accordionScript}<\/script>
-</body>
-</html>`;
-            download(finalHTML, "index.html", "text/html");
-        }
-
-        // 2. Download PDF (Versi Terbuka Semua)
-        function exportPDF() {
-            // Render versi print di hidden div atau ubah preview sementara
-            const target = document.getElementById('render-target');
-            const originalHTML = target.innerHTML;
-            
-            // Ubah ke mode print (tambah class print-mode ke container)
-            target.innerHTML = generateContent('print-export');
-            
-            // Tambahkan CSS spesifik ke dalam elemen sebelum di render
-            // html2pdf butuh style inline atau terinject
-            const element = target;
-            const opt = {
-                margin:       0,
-                filename:     'Portofolio_CV.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            // Inject CSS kita ke html2pdf
-            // Cara paling aman: Kita bungkus element dengan style tag
-            const styledElement = document.createElement('div');
-            styledElement.innerHTML = `<style>${mainCSS}</style>` + target.innerHTML;
-
-            html2pdf().set(opt).from(styledElement).save().then(() => {
-                // Balikkan tampilan preview ke mode normal
-                target.innerHTML = originalHTML;
-            });
-        }
-
-        // 3. Download Image (PNG/JPEG)
-        function exportImage(format) {
-            const target = document.getElementById('render-target');
-            const originalHTML = target.innerHTML;
-            
-            // Ubah ke mode print (container terbuka)
-            target.innerHTML = generateContent('print-export');
-
-            // Kita harus pastikan style ter-apply. 
-            // html-to-image biasanya membaca style computed.
-            // Kita inject style tag langsung ke dalam target sementara
-            const styleTag = document.createElement('style');
-            styleTag.innerHTML = mainCSS;
-            target.prepend(styleTag);
-
-            const options = { quality: 0.95, backgroundColor: '#1e3c72' }; // Background biru biar rapi
-
-            const generator = (format === 'png') ? htmlToImage.toPng(target, options) : htmlToImage.toJpeg(target, options);
-
-            generator.then(function (dataUrl) {
-                download(dataUrl, `cv-portfolio.${format}`);
-                // Restore preview
-                target.removeChild(styleTag);
-                target.innerHTML = originalHTML;
-            });
-        }
-
-
-        // --- E. HELPER FUNCTIONS (ADD/REMOVE) ---
+        // --- HELPER FUNCTIONS ---
         function createInput(ph, cls, type="text") {
             const el = document.createElement(type==='textarea'?'textarea':'input');
             el.placeholder = ph; el.className = cls; el.oninput = updateUI;
             return el;
         }
-
         function createRemoveBtn(parent) {
             const btn = document.createElement('button'); btn.className='btn-remove'; btn.innerHTML='×';
             btn.onclick = ()=>{ parent.remove(); updateUI(); }; return btn;
         }
-
         function addExperience() {
             const c = document.getElementById('exp-container');
             const d = document.createElement('div'); d.className='dynamic-item experience-item';
@@ -436,7 +333,6 @@
             d.appendChild(createInput('Deskripsi (Enter utk baris baru)', 'exp-desc', 'textarea'));
             c.appendChild(d); updateUI();
         }
-
         function addProject() {
             const c = document.getElementById('proj-container');
             const d = document.createElement('div'); d.className='dynamic-item project-item';
@@ -447,30 +343,49 @@
             d.appendChild(createInput('Link URL (Optional)', 'proj-link'));
             c.appendChild(d); updateUI();
         }
-
         function addSkill() {
             const c = document.getElementById('skill-container');
             const d = document.createElement('div'); d.className='dynamic-item skill-item';
             d.style.display="flex"; d.style.gap="10px"; d.style.alignItems="center";
             d.appendChild(createRemoveBtn(d));
-            
             const sel = document.createElement('select'); sel.className='skill-select';
-            skillIcons.forEach(opt => {
-                const o = document.createElement('option'); o.value=opt.val; o.innerText=opt.label;
-                sel.appendChild(o);
-            });
+            skillIcons.forEach(opt => { const o = document.createElement('option'); o.value=opt.val; o.innerText=opt.label; sel.appendChild(o); });
             sel.onchange=updateUI; d.appendChild(sel);
             d.appendChild(createInput('Nama Skill', 'skill-name'));
             c.appendChild(d); updateUI();
         }
 
+        // --- DOWNLOAD LOGIC ---
+        function downloadWebHTML() {
+            const content = generateContent('web-export');
+            const finalHTML = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Portofolio</title><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/><style>${mainCSS}</style></head><body>${content}<script>${accordionScript}<\/script></body></html>`;
+            download(finalHTML, "index.html", "text/html");
+        }
+
+        function exportPDF() {
+            const target = document.getElementById('render-target');
+            const originalHTML = target.innerHTML;
+            target.innerHTML = generateContent('print-export'); // Buka accordion
+            const styledElement = document.createElement('div');
+            styledElement.innerHTML = `<style>${mainCSS}</style>` + target.innerHTML;
+            
+            const opt = { margin: 0, filename: 'CV_Portofolio.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            html2pdf().set(opt).from(styledElement).save().then(() => { target.innerHTML = originalHTML; });
+        }
+
+        function exportImage(format) {
+            const target = document.getElementById('render-target');
+            const originalHTML = target.innerHTML;
+            target.innerHTML = generateContent('print-export'); // Buka accordion
+            const styleTag = document.createElement('style'); styleTag.innerHTML = mainCSS; target.prepend(styleTag);
+            const options = { quality: 0.95, backgroundColor: '#1e3c72' };
+            const generator = (format === 'png') ? htmlToImage.toPng(target, options) : htmlToImage.toJpeg(target, options);
+            generator.then(function (dataUrl) { download(dataUrl, `cv-portfolio.${format}`); target.removeChild(styleTag); target.innerHTML = originalHTML; });
+        }
+
         // Init
         window.onload = function() {
-            // Pasang style utama ke halaman admin ini juga agar Preview terlihat benar
-            const style = document.createElement('style');
-            style.innerHTML = mainCSS;
-            document.head.appendChild(style);
-            
+            const style = document.createElement('style'); style.innerHTML = mainCSS; document.head.appendChild(style);
             addExperience(); addSkill(); updateUI();
         }
     </script>
